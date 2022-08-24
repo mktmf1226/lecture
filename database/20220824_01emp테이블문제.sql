@@ -418,23 +418,28 @@ order by 근속년수;
 
 문41) 아래와 같이 출력 하시오
       예) 박지성의 근속년수 : 20년
-select ename || '의 근속년수 : ' || floor((sysdate - hiredate)/365) || '년'
+--결합 연산자 ||사용
+select ename || '의 근속년수 : ' || trunc((sysdate - hiredate)/365) || '년'
+from emp
+order by ename;
+
+--concat함수 사용
+select concat(ename,'의 근속년수 :'),concat(trunc((sysdate - hiredate)/365),'년')
 from emp
 order by ename;
 
 
-
 문42) 손흥민의 근속년수와 동일한 행을 조회(이름, 근속년수)하시오
 --손흥민의 근속년수
-select floor((sysdate - hiredate)/365)  --20
+select trunc((sysdate - hiredate)/365)  --20
 from emp
 where ename='손흥민';
 
 --손흥민의 근속년수와 동일한 행 조회
-select ename 이름, floor((sysdate - hiredate)/365) 근속년수
+select ename 이름, trunc((sysdate - hiredate)/365) 근속년수
 from emp
-where floor((sysdate - hiredate)/365)
-      =(select floor((sysdate - hiredate)/365) from emp where ename='손흥민')
+where trunc((sysdate - hiredate)/365)
+      =(select trunc((sysdate - hiredate)/365) from emp where ename='손흥민')
 order by ename;
 
 
@@ -444,10 +449,10 @@ select * from emp;
       연봉구하는 식 : 급여(sal)*12개월+보너스(comm)
 select empno 사번, ename 이름, hiredate 입사일
       ,sal*12+nvl(comm, 0) 현재연봉
-      ,(sal*12+nvl(comm, 0))+(sal*12+nvl(comm, 0))*0.1 인상후연봉
+      ,(sal*12+nvl(comm, 0))*1.1 인상후연봉
       ,(sal*12+nvl(comm, 0))*0.1 인상된금액
 from emp
-where floor((sysdate - hiredate)/365)>=15
+where trunc((sysdate - hiredate)/365)>=15
 order by sal*12+nvl(comm, 0) desc;
 
 

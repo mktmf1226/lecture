@@ -223,9 +223,11 @@ from emp;
 
 문25) 각 사람의 급여를 검색해서 '누구누구의 급여는 얼마입니다'로 조회하시오
       (|| 결합연산자)
+--|| 결합연산자
+select ename || '의 급여는 ' || sal || '입니다' as pay from emp;
 
-select ename || '의 급여는 ' || sal || '입니다' from emp;
-
+--concat(칼럼명, '문자열')
+select concat(ename, '의 급여는 '), concat(sal, '입니다') from emp;
 
 -- 연산자 우선순위
 () 괄호 : 연산자 우선순위보다 우선함
@@ -239,7 +241,7 @@ select ename || '의 급여는 ' || sal || '입니다' from emp;
       사원의 이름(ename), 입사일, 부서번호(deptno)를 입사일순으로 조회하시오
 select ename, hiredate, deptno
 from emp
-where hiredate<'2005-01-01'
+where hiredate<'2005-01-01' --'2005/01/01' 가능
 order by hiredate;
 
 문27) emp테이블에서 부서번호가 20번이나 30번인 부서에 속한
@@ -262,36 +264,36 @@ order by ename;
       (단, 부서코드가 10이면 관리부
                       20이면 영업부
                       30이면 교육부로 바꿔서 출력)
-select empno 사번, ename 이름, case when deptno=10 then '관리부'
+select empno, ename, deptno, case when deptno=10 then '관리부'
                                   when deptno=20 then '영업부'
                                   when deptno=30 then '교육부'
-                              end 부서
+                             end as deptname
 from emp;
 
 
 
 문29) 다음의 SQL문을 분석하시오
-      select empno, sal                 --3)사원번호와 급여를
-      from emp                          --1)emp테이블에서
-      where not(sal>200 and sal<300)    --2)sal이 200이하이고 300이상인 행에 대하여
-      order by sal;                     --4)급여를 오름차순으로 정렬하여 조회하시오
+      select empno, sal                 --3)
+      from emp                          --1)
+      where not(sal>200 and sal<300)    --2)
+      order by sal;                     --4)
 
 --1)emp테이블에서
---2)sal이 200보다 크고 300보다 작은값이 아닌 전체값에 대해서
--- (200보다 작거나 같고 300보다 크거나 같은) 
+--2)급여가 not(201~209)
+--  급여가 201~209가 아닌 행을 대상으로 
 --3)사원번호와 급여를
 --4)급여를 오름차순으로 정렬하여 조회하시오
 
 
 문30) 다음의 SQL문을 분석하시오
-      select empno, sal                 --3)사원번호와 급여를                 
-      from emp                          --1)emp테이블에서
-      where not sal>200 and sal<300     --2)sal이 200이하이고 300미만인 행에 대하여
-      order by sal;                     --4)급여를 오름차순으로 정렬하여 조회하시오
+      select empno, sal                 --3)           
+      from emp                          --1)
+      where not sal>200 and sal<300     --2)
+      order by sal;                     --4)
 
 --1)emp테이블에서
---2)sal이 200보다 크지 않고 300보다 작은
---  (200보다 작거나 같은)
+--2)급여가 not(>200)이면서 <300
+--  급여가 200이하면서 300미만인 행을 대상으로
 --3)사원번호와 급여를
 --4)급여를 오름차순으로 정렬하여 조회하시오
 
@@ -303,7 +305,8 @@ from emp;
 문31) 부서코드별 급여합계를 구하시오
 select deptno, sum(sal)
 from emp
-group by deptno;
+group by deptno
+order by deptno;
 
 문32) 부서코드별 급여합계를 구해서  그 합계값이 1500이상만 조회하시오
 select deptno, sum(sal)
@@ -336,6 +339,25 @@ order by avg(sal);
 
 
 문36) hiredate칼럼을 사용하여 월별로 입사한 인원수를 구하시오
+--변환함수 : to_char(원래날짜, '원하는 모양')
+
+--입사일 조회
+select hiredate from emp; 
+
+--입사일에서 월 가져오기
+select to_char(hiredate, 'mm') from emp;
+select to_char(hiredate, 'mm')as 월 from emp;
+
+select to_char(hiredate, 'yy')as 입사년도 from emp;
+select to_char(hiredate, 'dd')as 일 from emp;
+
+--입사 월별로 그룹
+select to_char(hiredate, 'mm')as 월, count(*) 
+from emp 
+group by to_char(hiredate, 'mm')
+order by 월;
+
+--extract함수로 추출
 select extract(month from hiredate), count(*)
 from emp
 group by extract(month from hiredate)
@@ -356,7 +378,7 @@ from emp
 where sal<(select sal from emp where empno=7654);
 
 문39) 부서별로 급여+커미션을 구했을때  최대값, 최소값, 평균값(반올림 해서)을 부서순으로 조회하시오
-select deptno, max(sal+comm), min(sal+comm), round(avg(sal+comm),0)
+select deptno, max(sal+nvl(comm,0)), min(sal+nvl(comm,0)), round(avg(sal+nvl(comm,0)),0)
 from emp
 group by deptno
 order by deptno;

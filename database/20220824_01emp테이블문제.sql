@@ -351,11 +351,11 @@ select to_char(hiredate, 'mm')as 월 from emp;
 select to_char(hiredate, 'yy')as 입사년도 from emp;
 select to_char(hiredate, 'dd')as 일 from emp;
 
---입사 월별로 그룹
+--입사 월별로 그룹화하고, 행갯수 구하기(인원수)
 select to_char(hiredate, 'mm')as 월, count(*) 
 from emp 
 group by to_char(hiredate, 'mm')
-order by 월;
+order by count(*) desc;
 
 --extract함수로 추출
 select extract(month from hiredate), count(*)
@@ -371,9 +371,11 @@ group by mgr;
 
 
 문38) 사원번호 7654와 급여보다 적은 행을 조회하시오
-select sal from emp where empno=7654; --결과값400 사원번호 7654의 급여
+--사원번호 7654의 급여
+select sal from emp where empno=7654; --400 
 
-select empno, sal
+--사원번호 7654의 급여보다 적은 행
+select empno, ename, sal
 from emp
 where sal<(select sal from emp where empno=7654);
 

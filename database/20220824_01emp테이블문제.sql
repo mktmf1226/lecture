@@ -380,29 +380,41 @@ from emp
 where sal<(select sal from emp where empno=7654);
 
 문39) 부서별로 급여+커미션을 구했을때  최대값, 최소값, 평균값(반올림 해서)을 부서순으로 조회하시오
-select deptno, max(sal+nvl(comm,0)), min(sal+nvl(comm,0)), round(avg(sal+nvl(comm,0)),0)
+select deptno, max(sal+nvl(comm,0)) 최대값
+             , min(sal+nvl(comm,0)) 최소값
+             , round(avg(sal+nvl(comm,0)),1) 평균값
 from emp
 group by deptno
 order by deptno;
-
+////////////////////////////////////////////////////////////////////////////////
+● [날짜 데이터의 연산]
 
 문40) 각 직원들에 대해서 직원의 이름과 근속년수를 구하시오
       단, 근속년수는 연단위를 버림하여 나타내시오
---근속년수 버림하기 전
+
+--이름, 입사일을 입사일순으로 조회하시오
+select ename, hiredate from emp order by hiredate;
+
+--근속일 : 현재날짜-입사일
+select ename, hiredate, sysdate-hiredate from emp order by hiredate;
+
+--(현재날짜-입사일)/365
 select ename, hiredate, (sysdate - hiredate)/365 as 근속년수
 from emp
-order by 근속년수;
+order by 근속년수 desc;
 
---floor함수
-select ename, hiredate, floor((sysdate - hiredate)/365) as 근속년수
+--(현재날짜-입사일)/365 -> 소수점 버림
+select ename, hiredate, trunc((sysdate - hiredate)/365) as 근속년수
 from emp
-order by 근속년수;
+order by 근속년수 desc;
 
 --extract(year from)함수
+--결과 부정확하므로 근속년수 계산으로 사용하지 않는다.
+/*
 select ename, hiredate, extract(year from sysdate)- extract(year from hiredate) as 근속년수
 from emp
 order by 근속년수;
-
+*/
 
 문41) 아래와 같이 출력 하시오
       예) 박지성의 근속년수 : 20년
@@ -421,7 +433,8 @@ where ename='손흥민';
 --손흥민의 근속년수와 동일한 행 조회
 select ename 이름, floor((sysdate - hiredate)/365) 근속년수
 from emp
-where floor((sysdate - hiredate)/365)=(select floor((sysdate - hiredate)/365) from emp where ename='손흥민')
+where floor((sysdate - hiredate)/365)
+      =(select floor((sysdate - hiredate)/365) from emp where ename='손흥민')
 order by ename;
 
 

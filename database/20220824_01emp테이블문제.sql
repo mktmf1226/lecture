@@ -1,5 +1,6 @@
 
-i:\java202207\database\20220823_01emp테이블문제.sql
+파일->새로만들기->데이터베이스계층->데이터베이스 파일
+i:\java202207\database\20220824_01emp테이블문제.sql
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -430,16 +431,23 @@ order by ename;
 
 
 문42) 손흥민의 근속년수와 동일한 행을 조회(이름, 근속년수)하시오
---손흥민의 근속년수
-select trunc((sysdate - hiredate)/365)  --20
-from emp
-where ename='손흥민';
+--손흥민 조회하기
+select * from emp where ename='손흥민';
+
+--손흥민의 근속년수 구하기
+select hiredate from emp where ename='손흥민';
+select sysdate-hiredate from emp where ename='손흥민';
+select (sysdate-hiredate)/365 from emp where ename='손흥민';
+select trunc((sysdate-hiredate)/365) from emp where ename='손흥민'; --20
 
 --손흥민의 근속년수와 동일한 행 조회
-select ename 이름, trunc((sysdate - hiredate)/365) 근속년수
+select ename 이름, hiredate, trunc((sysdate - hiredate)/365) 근속년수
 from emp
-where trunc((sysdate - hiredate)/365)
-      =(select trunc((sysdate - hiredate)/365) from emp where ename='손흥민')
+where trunc((sysdate - hiredate)/365)=(
+                                       select trunc((sysdate - hiredate)/365) 
+                                       from emp 
+                                       where ename='손흥민'
+                                       )
 order by ename;
 
 
@@ -447,22 +455,75 @@ select * from emp;
 문43) 입사한지 만15년 이상된 사람에 한해 현재연봉에서 10% 인상시켰을 때 
       사번, 이름, 입사일, 현재연봉, 인상후연봉, 인상된금액으로 고액연봉순으로 조회하시오
       연봉구하는 식 : 급여(sal)*12개월+보너스(comm)
+
+--근속년수가 15년 이상 조회하기
+select ename, hiredate, sal
+from emp
+where trunc((sysdate-hiredate)/365)>=15;
+
+--현재 연봉 구하기
+select ename, hiredate, sal, sal*12+comm
+from emp
+where trunc((sysdate-hiredate)/365)>=15;
+
+--현재 연봉 구하기 커미션의 null값 0으로 치환
+select ename, hiredate, sal, sal*12+nvl(comm,0) 
+from emp
+where trunc((sysdate-hiredate)/365)>=15;
+
+select ename, hiredate, sal, sal*12+nvl(comm,0) as 현재연봉
+from emp
+where trunc((sysdate-hiredate)/365)>=15;
+
+--현재연봉에서 10% 인상된 금액
+select ename, hiredate, sal
+     , sal*12+nvl(comm,0) as 현재연봉
+     , (sal*12+nvl(comm,0))*0.1 as 인상된금액
+from emp
+where trunc((sysdate-hiredate)/365)>=15;
+
+--현재연봉 + 인상된 금액 = 최종연봉
 select empno 사번, ename 이름, hiredate 입사일
-      ,sal*12+nvl(comm, 0) 현재연봉
-      ,(sal*12+nvl(comm, 0))*1.1 인상후연봉
-      ,(sal*12+nvl(comm, 0))*0.1 인상된금액
+     , sal*12+nvl(comm, 0) 현재연봉
+     , (sal*12+nvl(comm, 0))*0.1 인상된금액
+     , (sal*12+nvl(comm, 0))*1.1 인상후연봉
+from emp
+where trunc((sysdate - hiredate)/365)>=15;
+
+--최종연봉 소수점없이 반올림
+select empno 사번, ename 이름, hiredate 입사일
+     , sal*12+nvl(comm, 0) 현재연봉
+     , (sal*12+nvl(comm, 0))*0.1 인상된금액
+     , round((sal*12+nvl(comm, 0))*1.1) 인상후연봉
+from emp
+where trunc((sysdate - hiredate)/365)>=15;
+
+--최종연봉 내림차순 정렬하기
+select empno 사번, ename 이름, hiredate 입사일
+     , trunc((sysdate-hiredate)/365) 근속년수
+     , sal*12+nvl(comm, 0) 현재연봉
+     , (sal*12+nvl(comm, 0))*0.1 인상된금액
+     , round((sal*12+nvl(comm, 0))*1.1) 인상후연봉
 from emp
 where trunc((sysdate - hiredate)/365)>=15
-order by sal*12+nvl(comm, 0) desc;
+order by 인상후연봉 desc;
 
 
-문44) 입사년도가 짝수인 직원들의 급여의 평균을 job별로 출력하시오
---입사년도가 짝수인 직원들
-select ename, hiredate, job
+
+
+문44) 입사년도가 짝수인 직원들의 급여의 평균을 직급(job)별로 출력하시오
+--직급, 입사일 조회하기
+select job,hiredate from emp;
+
+--입사일에서 년도 추출하기
+select hiredate, extract(year from hiredate) from emp;
+
+--짝수년도 추출하기
+select ename, job, hiredate, extract(year from hiredate)
 from emp
 where mod(extract(year from hiredate),2)=0;
 
---입사년도가 짝수인 직원들의 급여의 평균을 job별로 조회
+--직급별 급여의 평균 구하기
 select job, avg(sal)
 from emp
 where mod(extract(year from hiredate),2)=0

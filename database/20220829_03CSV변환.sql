@@ -50,6 +50,73 @@ group by zipno;
 ////////////////////////////////////////////////////////////////////
 
 문2) 한국교원대학교_초중등학교위치.csv를 변환하시오 (11874행)
+
+create table school (
+    schoolid    varchar2(10)     --학교ID
+   ,schoolname  varchar2(255)   --학교명 
+   ,schoolgubun varchar2(20)    --학교급구분
+   ,schooladdr  varchar2(255)   --소재지도로명주소
+   ,cdate       date             --생성일자 (형식 YYYY-MM-DD)
+   ,udate       date             --변경일자 (형식 YYYY-MM-DD)
+   ,latitude    number(20,10)    --위도
+   ,longitude   number(20,10)    --경도
+);
+
+commit;
+select count(*) from school;
+select * from school;
+
+select * from school where schoolid is null;
+select * from school where schoolname is null;
+select * from school where schoolgubun is null;
+select * from school where schooladdr is null;      --B000027304행에서 비어있음
+select * from school where cdate is null;
+select * from school where udate is null;
+select * from school where latitude is null;
+select * from school where longitude is null;
+
+
+문) 각 시도별 초등학교 중학교 구하기
+(서울특별시, 부산광역시, 대구광역시, 인천광역시, 광주광역시, 대전광역시, 울산광역시, 
+경기도, 광원도, 충청북도, 충청남도, 세종특별자치시, 전라북도, 전라남도, 경상북도, 경상남도, 경남,
+제주특별자치도, 충북, 전북, 대구, 경북)
+
+select substr(schooladdr, 1, instr(schooladdr, ' ')), schoolgubun, count(*)
+from school
+where schoolgubun='초등학교' or schoolgubun='중학교'
+group by substr(schooladdr, 1, instr(schooladdr, ' ')), schoolgubun
+order by substr(schooladdr, 1, instr(schooladdr, ' '));
+
+
+select
+     nvl(cho.addr1, '-') as 지역
+    ,nvl(cho.ckinds, '초등학교') as 학교구분
+    ,nvl(cho.c_cnt, 0) as 갯수
+    ,nvl(jung.addr2, '-') as 지역
+    ,nvl(jung.jkinds, '중학교') as 학교구분
+    ,nvl(jung.j_cnt, 0) as 갯수
+from(
+    select addr1, ckinds, count(*) as c_cnt
+    from (
+        select substr(schooladdr, 0, instr(schooladdr, ' ')) as addr1, schoolgubun as ckinds
+        from school
+        )
+    group by addr1, ckinds
+    having ckinds like '초%'
+    ) cho full join (
+                select addr2, jkinds
+, count(*) as j_cnt
+                from (
+                    select substr(schooladdr, 0, instr(schooladdr, ' ')) as addr2, schoolgubun as jkinds
+                    from school
+                    )
+                group by addr2, jkinds
+                having jkinds like '중%'
+                ) jung
+on cho.addr1 = jung.addr2
+order by cho.addr1;
+
+/*
 create table tb_school (
     schno   char(10)        --학교ID
    ,schname varchar(1000)   --학교명 
@@ -60,11 +127,11 @@ create table tb_school (
    ,letitd  number(12,9)    --위도
    ,longitd number(12,9)    --경도
 );
+*/
 
+/*
 commit;
 drop table tb_school;
-
-
 select count(*) from tb_school;
 
 select *
@@ -77,4 +144,4 @@ where schno is null or
       condt is null or
       letitd is null or
       longitd is null;
-
+*/

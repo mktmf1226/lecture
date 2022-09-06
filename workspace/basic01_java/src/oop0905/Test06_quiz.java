@@ -40,4 +40,8 @@ public class Test06_quiz {
 		
 		
 	}//main() end
+<<<<<<< HEAD
 }//class end
+=======
+}//class end
+>>>>>>> 8ed8dea8d71da38a270868c1ef7e003a724f82ac
